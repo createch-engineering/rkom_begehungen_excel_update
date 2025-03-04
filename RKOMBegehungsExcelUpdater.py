@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog as fd
 from openpyxl import load_workbook
-
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 from planio.planio_queries import (
     get_begehungsdaten
@@ -29,6 +29,9 @@ def main():
         root.configure(bg="white")
         filename.configure(text=fd.askopenfilename())
     def update_file(filename):
+        # Function to copy the formatting from one column to another
+        
+
         if filename.cget("text").endswith(".xlsx"):
             output_label.configure(text="Fehler (Zieldatei muss geschlossen sein)",bg="orange")
             file_label.configure(bg="orange")
@@ -66,7 +69,44 @@ def main():
             # Load the existing workbook
             book = load_workbook(filename.cget("text"))
             sheet = book.worksheets[0]
+            def copy_column_formatting(sheet, source_col, target_col, start_row=1, end_row=sheet.max_row):
+                for row in range(start_row, end_row + 1):
+                    # Copy the cell formatting from the source column to the target column
+                    source_cell = sheet.cell(row=row, column=source_col)
+                    target_cell = sheet.cell(row=row, column=target_col)
 
+                    # Copy font
+                    target_cell.font = Font(name=source_cell.font.name, size=source_cell.font.size, 
+                                bold=source_cell.font.bold, italic=source_cell.font.italic, 
+                                color=source_cell.font.color, underline=source_cell.font.underline)
+                    # Copy fill (background color)
+                    if source_cell.fill.start_color:
+                        target_cell.fill = PatternFill(start_color=source_cell.fill.start_color, 
+                                                    end_color=source_cell.fill.end_color, 
+                                                    fill_type=source_cell.fill.fill_type)
+                    else:
+                        target_cell.fill = PatternFill(fill_type='none')  # If no fill, apply no fill
+                    # Copy alignment
+                    target_cell.alignment = Alignment(horizontal=source_cell.alignment.horizontal,
+                                           vertical=source_cell.alignment.vertical,
+                                           text_rotation=source_cell.alignment.text_rotation,
+                                           wrap_text=source_cell.alignment.wrap_text,
+                                           shrink_to_fit=source_cell.alignment.shrink_to_fit)
+                    # Copy borders
+                    target_cell.border = Border(
+            left=source_cell.border.left,
+            right=source_cell.border.right,
+            top=source_cell.border.top,
+            bottom=source_cell.border.bottom
+        )
+
+            # Specify the column range you want to copy formatting from (for example, columns 1 to 4)
+            start_col = 1  # Column A
+            end_col = 26    # Column D (you can adjust this)
+            new_start_col = 2 # Start from column E to extend formatting
+
+            for col in range(start_col, end_col + 1):
+                copy_column_formatting(sheet, start_col, col + (new_start_col - start_col))
             # Write the column names (headers) to the first row
             for col_num, column_name in enumerate(df.columns, start=1):
                 sheet.cell(row=1, column=col_num, value=column_name)
