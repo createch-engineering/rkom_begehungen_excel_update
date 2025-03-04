@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog as fd
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 from planio.planio_queries import (
@@ -38,8 +39,11 @@ def main():
             filename.configure(bg="orange")
             root.configure(bg="orange")
             begehungsdaten = get_begehungsdaten(api_key,'131')
-            print(begehungsdaten)
+            # print("planio-------------------------------------")
+            # print(begehungsdaten)
             df = pd.read_excel(filename.cget("text"))
+            # print("excel--------------------------------------")
+            # print(df)
             # Iterate through each row
             for index, row in df.iterrows():
                 # You can access individual values by column name
@@ -57,10 +61,12 @@ def main():
                         if not pd.isnull(planio_row["protokoll"].iloc[0]):
                             df.loc[index, "Potokoll versandt"] = planio_row["protokoll"].iloc[0]
                         df.loc[index, "Sachstand"] = planio_row["sachstand"].iloc[0]
-                        if not pd.isnull(row["Erschließung-Bemerkung"]):
-                            df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"] + " + " + planio_row["bemerkung"].iloc[0]
-                        else:
+                        if not pd.isnull(row["Erschließung-Bemerkung"]) and not pd.isnull(planio_row["bemerkung"].iloc[0]):
+                            df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"] + "\n" + planio_row["bemerkung"].iloc[0]
+                        elif not pd.isnull(planio_row["bemerkung"].iloc[0]):
                             df.loc[index, "Erschließung-Bemerkung"] = planio_row["bemerkung"].iloc[0]
+                        else:
+                            df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"]
                         # if handle_boolean(row["Nutzungsvereinbarung"]) and planio_row["status"].iloc[0] == "Wartend":
                         #     print("change" + str(planio_row["issue_id"].iloc[0]))
                             
@@ -94,11 +100,41 @@ def main():
                                            shrink_to_fit=source_cell.alignment.shrink_to_fit)
                     # Copy borders
                     target_cell.border = Border(
-            left=source_cell.border.left,
-            right=source_cell.border.right,
-            top=source_cell.border.top,
-            bottom=source_cell.border.bottom
-        )
+                        left=source_cell.border.left,
+                        right=source_cell.border.right,
+                        top=source_cell.border.top,
+                        bottom=source_cell.border.bottom
+                    )
+
+            # Function to adjust row height based on wrapped text
+            def adjust_row_height(sheet, row_num, min_height=15):
+                max_length = 0
+                for col_num in range(1, 18):
+                    cell = sheet.cell(row=row_num, column=col_num)
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                
+                # Estimate row height based on max length of the content
+                # You can adjust this heuristic value as necessary (e.g., the multiplier `1.2` may need tweaking).
+                estimated_height = max(min_height, int(max_length / 2) * 1.2)  # Adjust multiplier as needed
+                sheet.row_dimensions[row_num].height = estimated_height
+
+            # Function to adjust column widths to the longest string, excluding the header
+            def adjust_columns_to_longest_line(sheet):
+                for col in sheet.columns:
+                    max_length = 0
+                    column = col[0].column_letter  # Get the column name (e.g., 'A', 'B', etc.)
+
+                    # Skip the first row (header)
+                    for cell in col[1:]:  # Start from the second row (index 1)
+                        if cell.value:
+                            # Consider line breaks, so split the text by line breaks and calculate the longest line
+                            lines = str(cell.value).split('\n')
+                            max_length = max(max_length, max(len(line) for line in lines))
+
+                    # Adjust the width by adding padding (you can adjust this number as needed)
+                    adjusted_width = max_length + 2  # Add some padding
+                    sheet.column_dimensions[column].width = adjusted_width
 
             # Specify the column range you want to copy formatting from (for example, columns 1 to 4)
             start_col = 1  # Column A
@@ -115,13 +151,28 @@ def main():
             for row_num, row in enumerate(df.values, start=2):
                 for col_num, value in enumerate(row, start=1):
                     sheet.cell(row=row_num, column=col_num, value=value)
+                adjust_row_height(sheet,row_num)
+            adjust_columns_to_longest_line(sheet)
+            # Set column widths
+            sheet.column_dimensions['I'].width = 20
+            sheet.column_dimensions['J'].width = 20
+            sheet.column_dimensions['K'].width = 20
+            sheet.column_dimensions['O'].width = 25
+            # Specify the column you want to modify (e.g., column 'A')
+            column_letter = 'R'
+
+            # Loop through all rows in the specified column and set text alignment to left
+            for row in sheet.iter_rows(min_col=sheet[column_letter][0].column, max_col=sheet[column_letter][0].column, min_row=1, max_row=sheet.max_row):
+                for cell in row:
+                    # Set the cell's horizontal alignment to left
+                    cell.alignment = Alignment(horizontal='left')
 
             # Save the modified workbook
             book.save(filename.cget("text"))
 
             output_label.configure(text="Fertig",bg="lightgreen")
             file_label.configure(bg="lightgreen")
-            filename.configure(bg="lightgreen")
+            filename.configure(text="",bg="lightgreen")
             root.configure(bg="lightgreen")
         else:
             output_label.configure(text="Datei nicht kompatibel",bg="yellow")

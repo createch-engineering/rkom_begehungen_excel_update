@@ -8,9 +8,27 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
     begehungsdaten = []
     offset = 0
     while True:
+        # First URL and response
         url = f'{URL_PLANIO_ISSUES}.json?tracker_id={tracker_ids}&limit=100&offset={offset}'
         response = requests.get(url, headers=headers)
-        data: dict = response.json()
+        data = response.json()  # First dictionary response
+
+        # Second URL and response
+        url = f'{URL_PLANIO_ISSUES}.json?status_id=c&tracker_id={tracker_ids}&limit=100&offset={offset}'
+        response2 = requests.get(url, headers=headers)
+        data2 = response2.json()  # Second dictionary response
+
+        # Assuming both dictionaries have a key 'issues' which holds lists
+        issues1 = data.get('issues', [])
+        issues2 = data2.get('issues', [])
+
+        # Combine the lists of issues
+        combined_issues = issues1 + issues2
+
+        # Now update the 'issues' key in data1 with the combined issues
+        data['issues'] = combined_issues
+
+        # Now 'data1' contains the combined issues from both dictionaries
         if not data["issues"]:
             break
         
