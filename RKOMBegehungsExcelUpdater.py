@@ -35,18 +35,24 @@ def main():
             filename.configure(bg="orange")
             root.configure(bg="orange")
             begehungsdaten = get_begehungsdaten(api_key,'131')
+            print(begehungsdaten)
             df = pd.read_excel(filename.cget("text"))
-
             # Iterate through each row
             for index, row in df.iterrows():
                 # You can access individual values by column name
                 if(not pd.isnull(row['Strasse'])):
                     zusatz = ""
                     if(not pd.isnull(row['Hhnrzusatz'])):
-                        zusatz = " " + row['Hhnrzusatz']
-                    adresse = str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']
-                    planio_row = begehungsdaten[begehungsdaten["address"] == adresse].head(1)
+                        zusatz = row['Hhnrzusatz']
+                    adressen = [(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + " " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + " " + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + " " + zusatz + " " + str(int(row['Plz'])) + " " + row['Ort'])]
+                    for adresse in adressen:
+                        if not begehungsdaten[begehungsdaten["address"] == adresse].head(1).empty:
+                            planio_row = begehungsdaten[begehungsdaten["address"] == adresse].head(1)
+                    
                     if not planio_row.empty:
+                        df.loc[index, "Status"] = planio_row["status"].iloc[0]
+                        if not pd.isnull(planio_row["protokoll"].iloc[0]):
+                            df.loc[index, "Potokoll versandt"] = planio_row["protokoll"].iloc[0]
                         df.loc[index, "Sachstand"] = planio_row["sachstand"].iloc[0]
                         if not pd.isnull(row["Erschließung-Bemerkung"]):
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"] + " + " + planio_row["bemerkung"].iloc[0]
@@ -55,24 +61,24 @@ def main():
                         # if handle_boolean(row["Nutzungsvereinbarung"]) and planio_row["status"].iloc[0] == "Wartend":
                         #     print("change" + str(planio_row["issue_id"].iloc[0]))
                             
-            
-            # print("Planio________________________________")
-            # print(df)
-            #print(begehungsdaten)
-            statuses = []
-            for index,row in begehungsdaten.iterrows():
-                if not row["status"] in statuses:
-                    statuses.append(row["status"])
-                #print(row)
-                #print(statuses)
-            
+
+
             # Load the existing workbook
-            book = load_workbook(filename.cget("text")) #filename.cget("text")
+            book = load_workbook(filename.cget("text"))
             sheet = book.worksheets[0]
-            for row_num, row in enumerate(df.values,2): 
+
+            # Write the column names (headers) to the first row
+            for col_num, column_name in enumerate(df.columns, start=1):
+                sheet.cell(row=1, column=col_num, value=column_name)
+
+            # Write the data to the sheet, starting from row 2
+            for row_num, row in enumerate(df.values, start=2):
                 for col_num, value in enumerate(row, start=1):
                     sheet.cell(row=row_num, column=col_num, value=value)
-            book.save(filename.cget("text")) #filename.cget("text")
+
+            # Save the modified workbook
+            book.save(filename.cget("text"))
+
             output_label.configure(text="Fertig",bg="lightgreen")
             file_label.configure(bg="lightgreen")
             filename.configure(bg="lightgreen")
