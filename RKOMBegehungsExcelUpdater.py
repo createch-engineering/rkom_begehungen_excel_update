@@ -63,9 +63,20 @@ def main():
                             df.loc[index, "Potokoll versandt"] = planio_row["protokoll"].iloc[0]
                         df.loc[index, "Sachstand"] = planio_row["sachstand"].iloc[0]
                         if not pd.isnull(row["Erschließung-Bemerkung"]) and not pd.isnull(planio_row["bemerkung"].iloc[0]):
+                            patterns = [r"\nOrtstermin: \d{4}-\d{2}-\d{2}",r"\n\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}"]
+                            # Loop through the patterns
+                            for pattern in patterns:
+                                # Use re.sub() to replace matched patterns with an empty string
+                                row["Erschließung-Bemerkung"] = re.sub(pattern, "", row["Erschließung-Bemerkung"])
+
+                            # Clean up leading/trailing spaces after replacement
+                            row["Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"].strip()
+
+                            # Print the updated row
+                            print(row["Erschließung-Bemerkung"])
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"] + "\n" + planio_row["bemerkung"].iloc[0]
                         elif not pd.isnull(planio_row["bemerkung"].iloc[0]):
-                            df.loc[index, "Erschließung-Bemerkung"] = planio_row["bemerkung"].iloc[0]
+                            df.loc[index, "Erschließung-Bemerkung"] = "\n" + planio_row["bemerkung"].iloc[0]
                         else:
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"]
                         # if handle_boolean(row["Nutzungsvereinbarung"]) and planio_row["status"].iloc[0] == "Wartend":
