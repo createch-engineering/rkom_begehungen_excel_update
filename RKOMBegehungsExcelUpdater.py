@@ -5,6 +5,7 @@ from tkinter import filedialog as fd
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+import re
 
 from planio.planio_queries import (
     get_begehungsdaten
@@ -107,7 +108,7 @@ def main():
                     )
 
             # Function to adjust row height based on wrapped text
-            def adjust_row_height(sheet, row_num, min_height=15):
+            def adjust_row_height(sheet, row_num, min_height=25):
                 max_length = 0
                 for col_num in range(1, 18):
                     cell = sheet.cell(row=row_num, column=col_num)
