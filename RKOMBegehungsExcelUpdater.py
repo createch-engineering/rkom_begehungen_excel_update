@@ -73,9 +73,7 @@ def main():
                             # Clean up leading/trailing spaces after replacement
                             row["Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"].strip()
                             print(row["Erschließung-Bemerkung"])
-                            df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"] + "\n" + planio_row["bemerkung"].iloc[0]
                         elif not pd.isnull(planio_row["bemerkung"].iloc[0]):
-                            df.loc[index, "Erschließung-Bemerkung"] = "\n" + planio_row["bemerkung"].iloc[0]
                         else:
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"]
                         # if handle_boolean(row["Nutzungsvereinbarung"]) and planio_row["status"].iloc[0] == "Wartend":
