@@ -78,7 +78,6 @@ def main():
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"]
                         # if handle_boolean(row["Nutzungsvereinbarung"]) and planio_row["status"].iloc[0] == "Wartend":
                         #     print("change" + str(planio_row["issue_id"].iloc[0]))
-                            
 
 
             # Load the existing workbook
