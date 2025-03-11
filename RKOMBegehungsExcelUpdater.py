@@ -78,8 +78,19 @@ def main():
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"]
                         # if handle_boolean(row["Nutzungsvereinbarung"]) and planio_row["status"].iloc[0] == "Wartend":
                         #     print("change" + str(planio_row["issue_id"].iloc[0]))
-
-
+                        
+            # Define the desired column order
+            desired_column_order = []
+            for column in df.columns:
+                if column == "Status":
+                    break
+                desired_column_order.append(column)
+            desired_column_order.append("Status")
+            desired_column_order.append("Potokoll versandt")
+            desired_column_order.append("Abgelegt & Übergeben")
+            desired_column_order.append("Sachstand")
+            # Reorder the DataFrame columns
+            df = df[desired_column_order]
             # Load the existing workbook
             book = load_workbook(filename.cget("text"))
             sheet = book.worksheets[0]
