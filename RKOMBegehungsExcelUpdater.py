@@ -63,7 +63,6 @@ def main():
                             df.loc[index, "Potokoll versandt"] = planio_row["protokoll"].iloc[0]
                         df.loc[index, "Sachstand"] = planio_row["sachstand"].iloc[0]
                         if not pd.isnull(row["Erschließung-Bemerkung"]) and not pd.isnull(planio_row["bemerkung"].iloc[0]):
-                            patterns = [r"\nOrtstermin: \d{4}-\d{2}-\d{2}",r"\n\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}"]
                             # Loop through the patterns
                             for pattern in patterns:
                                 # Use re.sub() to replace matched patterns with an empty string
