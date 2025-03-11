@@ -64,7 +64,7 @@ def main():
                         df.loc[index, "Abgelegt & Übergeben"] = planio_row["closed_on"].iloc[0]
                         df.loc[index, "Sachstand"] = planio_row["sachstand"].iloc[0]
                         if not pd.isnull(row["Erschließung-Bemerkung"]) and not pd.isnull(planio_row["bemerkung"].iloc[0]):
-                            patterns = [r"\nOrtstermin: \d{4}-\d{2}-\d{2}",r"\n\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}",r"Ortstermin: \d{4}-\d{2}-\d{2}",r"\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}"]
+                            patterns = [r"\nOrtstermin: \d{4}-\d{2}-\d{2}",r"\n\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}",r"Ortstermin: \d{4}-\d{2}-\d{2}",r"\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}",r"\nOrtstermin: \d{2}.\d{2}.\d{4}",r"Ortstermin: \d{2}.\d{2}.\d{4}",r"\n\d{1}. Kontaktversuch: \d{2}.\d{2}.\d{4}",r"\d{1}. Kontaktversuch: \d{2}.\d{2}.\d{4}"]
                             # Loop through the patterns
                             for pattern in patterns:
                                 # Use re.sub() to replace matched patterns with an empty string
