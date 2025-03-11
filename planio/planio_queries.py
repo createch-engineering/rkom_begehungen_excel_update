@@ -63,21 +63,13 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
                 if custom_field["name"] == "Sachstand" and custom_field["value"] != "":
                     sachstand = sachstand + (custom_field["value"]) + "\n"
                 if custom_field["name"] == "Ortstermin" and custom_field["value"] != "":
-                    bemerkung = custom_field["name"] + ": " + custom_field["value"] + "\n"
+                    bemerkung = custom_field["name"] + ": " + format_date_from_string(custom_field["value"]) + "\n"
                 if custom_field["name"].endswith("Kontaktversuch") and custom_field["value"] != "":
-                    bemerkung = bemerkung + custom_field["name"] + ": " + custom_field["value"] + "\n"
+                    bemerkung = bemerkung + custom_field["name"] + ": " + format_date_from_string(custom_field["value"]) + "\n"
                 if custom_field["name"] == "Protokoll versendet" and custom_field["value"]:
-                    date = custom_field["value"].split("T")[0]
-                    date1 = int(date.split("-")[0])
-                    date2 = int(date.split("-")[1])
-                    date3 = int(date.split("-")[2])
-                    protokoll = datetime.datetime(date1,date2,date3).strftime("%d.%m.%Y")
+                    protokoll = format_date_from_string(custom_field["value"])
             if issue["closed_on"]:
-                date = issue["closed_on"].split("T")[0]
-                date1 = int(date.split("-")[0])
-                date2 = int(date.split("-")[1])
-                date3 = int(date.split("-")[2])
-                closed_on = datetime.datetime(date1,date2,date3).strftime("%d.%m.%Y")
+                closed_on = format_date_from_string(issue["closed_on"])
             issue_data = {
                 'issue_id': issue['id'],
                 'Gfrgebaeudeid': int(issue["subject"].split()[0]),
@@ -99,3 +91,10 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
     df = pd.DataFrame(data=begehungsdaten)
     #print(df.head(50))
     return df
+
+def format_date_from_string(str):
+    date = str.split("T")[0]
+    date1 = int(date.split("-")[0])
+    date2 = int(date.split("-")[1])
+    date3 = int(date.split("-")[2])
+    return datetime.datetime(date1,date2,date3).strftime("%d.%m.%Y")
