@@ -6,7 +6,6 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 import re
-from tkinterdnd2 import TkinterDnD, DND_FILES
 from planio.planio_queries import (
     get_begehungsdaten
 )
@@ -190,7 +189,7 @@ def main():
             column_letter = 'S'
 
             # Loop through all rows in the specified column and set text alignment to left
-            for row in sheet.iter_rows(min_col=sheet[column_letter][0].column, max_col=sheet[column_letter][0].column, min_row=1, max_row=sheet.max_row):
+            for row in sheet.iter_rows(min_col=sheet[column_letter][0].column, max_col=sheet[column_letter][0].column, min_row=2, max_row=sheet.max_row):
                 for cell in row:
                     # Set the cell's horizontal alignment to left
                     cell.alignment = Alignment(horizontal='left')
@@ -212,18 +211,9 @@ def main():
         file_label.configure(wraplength=root.winfo_width()-50)
         output_label.configure(wraplength=root.winfo_width()-50)
         filename.configure(wraplength=root.winfo_width()-50)
-    def on_drop(event):
-        output_label.configure(text="",bg="white")
-        file_label.configure(bg="white")
-        filename.configure(bg="white")
-        root.configure(bg="white")
-        # Get the file path from the event and display it
-        file_path = event.data
-        file_name = file_path.split("{")[1] 
-        file_name = file_name.split("}")[0]  
-        filename.config(text=file_name)
+    
     # Create the main window
-    root = TkinterDnD.Tk()
+    root = tk.Tk()
     window_width = 400
     window_height = 150
     screen_width = root.winfo_screenwidth()
@@ -239,8 +229,6 @@ def main():
     file_label.pack()
     filename = tk.Label(root,text="Keine",bg="white",wraplength = window_width-50) #Keine
     filename.pack()
-    root.drop_target_register(DND_FILES)
-    root.dnd_bind('<<Drop>>', on_drop)
     file_button = ttk.Button(root,text="Datei auswählen",command = lambda: select_file())
     file_button.pack()
     update_button = ttk.Button(root,text="Updaten",command = lambda: update_file(filename))
