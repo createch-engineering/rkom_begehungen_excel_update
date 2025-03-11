@@ -72,7 +72,7 @@ def main():
 
                             # Clean up leading/trailing spaces after replacement
                             row["Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"].strip()
-                            print(row["Erschließung-Bemerkung"])
+                            #print(row["Erschließung-Bemerkung"])
                             # Print the updated row
                             #print(row["Erschließung-Bemerkung"])
                             if row["Erschließung-Bemerkung"] != "":
@@ -177,6 +177,8 @@ def main():
             for row_num, row in enumerate(df.values, start=2):
                 for col_num, value in enumerate(row, start=1):
                     sheet.cell(row=row_num, column=col_num, value=value)
+                    
+            for row_num, row in enumerate(df.values, start=1):
                 adjust_row_height(sheet,row_num)
             adjust_columns_to_longest_line(sheet)
             # Set column widths
