@@ -80,7 +80,7 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
                 closed_on = datetime.datetime(date1,date2,date3).strftime("%d.%m.%Y")
             issue_data = {
                 'issue_id': issue['id'],
-                'address': issue["subject"],
+                'Gfrgebaeudeid': int(issue["subject"].split()[0]),
                 'status': issue["status"]['name'],
                 'sachstand': sachstand,
                 'bemerkung': bemerkung,

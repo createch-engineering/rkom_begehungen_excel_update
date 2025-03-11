@@ -49,14 +49,14 @@ def main():
             for index, row in df.iterrows():
                 # You can access individual values by column name
                 if(not pd.isnull(row['Strasse'])):
-                    zusatz = ""
-                    if(not pd.isnull(row['Hhnrzusatz'])):
-                        zusatz = row['Hhnrzusatz']
-                    adressen = [(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + " " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + " " + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + " " + zusatz + " " + str(int(row['Plz'])) + " " + row['Ort'])]
-                    for adresse in adressen:
-                        if not begehungsdaten[begehungsdaten["address"] == adresse].head(1).empty:
-                            planio_row = begehungsdaten[begehungsdaten["address"] == adresse].head(1)
-                    
+                    # zusatz = ""
+                    # if(not pd.isnull(row['Hhnrzusatz'])):
+                    #     zusatz = row['Hhnrzusatz']
+                    # adressen = [(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + zusatz + " " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + " " + zusatz + ", " + str(int(row['Plz'])) + " " + row['Ort']),(str(row['Gfrgebaeudeid']) + " - " + row['Strasse'] + " " +str(int(row['Hhnr'])) + " " + zusatz + " " + str(int(row['Plz'])) + " " + row['Ort'])]
+                    # for adresse in adressen:
+                    #     print(adresse)
+                    if not begehungsdaten[begehungsdaten["Gfrgebaeudeid"] == row['Gfrgebaeudeid']].head(1).empty:
+                        planio_row = begehungsdaten[begehungsdaten["Gfrgebaeudeid"] == row['Gfrgebaeudeid']].head(1)
                     if not planio_row.empty:
                         df.loc[index, "Status"] = planio_row["status"].iloc[0]
                         if not pd.isnull(planio_row["protokoll"].iloc[0]):
