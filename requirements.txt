@@ -6,3 +6,4 @@ xlsxwriter
 xlrd
 openpyxl
 tkinter
+tkinterdnd2
