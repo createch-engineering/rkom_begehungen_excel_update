@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import datetime
 
 URL_PLANIO_ISSUES = 'https://createcheng.planio.de/issues'
 
@@ -9,18 +10,37 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
     offset = 0
     while True:
         # First URL and response
-        url = f'{URL_PLANIO_ISSUES}.json?tracker_id={tracker_ids}&limit=100&offset={offset}'
+        url = f'{URL_PLANIO_ISSUES}.json?include=journals&tracker_id={tracker_ids}&limit=100&offset={offset}'
         response = requests.get(url, headers=headers)
         data = response.json()  # First dictionary response
-
         # Second URL and response
-        url = f'{URL_PLANIO_ISSUES}.json?status_id=c&tracker_id={tracker_ids}&limit=100&offset={offset}'
+        url = f'{URL_PLANIO_ISSUES}.json?include=journals&status_id=c&tracker_id={tracker_ids}&limit=100&offset={offset}'
         response2 = requests.get(url, headers=headers)
         data2 = response2.json()  # Second dictionary response
 
         # Assuming both dictionaries have a key 'issues' which holds lists
         issues1 = data.get('issues', [])
         issues2 = data2.get('issues', [])
+        # Iterate through each issue to fetch the issue data with journals
+        for issue in issues2:
+            issue_id = issue['id']
+            issue_url = f'{URL_PLANIO_ISSUES}/{issue_id}.json'
+            issue_params = {'include': 'journals'}  # Request journals for each issue
+            
+            # Request the individual issue with journals
+            issue_response = requests.get(issue_url, headers=headers, params=issue_params)
+            
+            # Check if the individual issue request was successful
+            if issue_response.status_code == 200:
+                issue_data = issue_response.json()
+                journals = issue_data.get('issue', {}).get('journals', [])
+                
+                # Now you can process the issue data and its journals
+                if journals:
+                    for journal in journals:
+                        for detail in journal["details"]:
+                            if detail["new_value"] == "27":
+                                issue["closed_on"] = journal["created_on"]
 
         # Combine the lists of issues
         combined_issues = issues1 + issues2
@@ -36,6 +56,7 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
             sachstand = ""
             bemerkung = ""
             protokoll = ""
+            closed_on = ""
             #print(issue['id'],"\n","\n",issue["status"]['name'],"\n",issue["parent"]['id'],"\n",issue["subject"],"\n",issue["description"])
             #print(issue['id'],"\n",issue["project"]['name'],"\n",issue["tracker"]['name'],"\n",issue["status"]['name'],"\n",issue["parent"]['id'],"\n",issue["subject"],"\n",issue["description"])
             for custom_field in issue["custom_fields"]:
@@ -46,7 +67,17 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
                 if custom_field["name"].endswith("Kontaktversuch") and custom_field["value"] != "":
                     bemerkung = bemerkung + custom_field["name"] + ": " + custom_field["value"] + "\n"
                 if custom_field["name"] == "Protokoll versendet" and custom_field["value"]:
-                    protokoll = "" + custom_field["value"]
+                    date = custom_field["value"].split("T")[0]
+                    date1 = int(date.split("-")[0])
+                    date2 = int(date.split("-")[1])
+                    date3 = int(date.split("-")[2])
+                    protokoll = datetime.datetime(date1,date2,date3).strftime("%d.%m.%Y")
+            if issue["closed_on"]:
+                date = issue["closed_on"].split("T")[0]
+                date1 = int(date.split("-")[0])
+                date2 = int(date.split("-")[1])
+                date3 = int(date.split("-")[2])
+                closed_on = datetime.datetime(date1,date2,date3).strftime("%d.%m.%Y")
             issue_data = {
                 'issue_id': issue['id'],
                 'address': issue["subject"],
@@ -55,6 +86,7 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
                 'bemerkung': bemerkung,
                 'description': issue["description"],
                 'protokoll': protokoll,
+                'closed_on': closed_on,
             }
             # for custom_field in issue.get('custom_fields'):
             #     if custom_field['name'] == nachbesserungsgrund_fieldname:

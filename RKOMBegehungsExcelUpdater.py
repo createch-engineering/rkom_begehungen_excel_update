@@ -61,6 +61,7 @@ def main():
                         df.loc[index, "Status"] = planio_row["status"].iloc[0]
                         if not pd.isnull(planio_row["protokoll"].iloc[0]):
                             df.loc[index, "Potokoll versandt"] = planio_row["protokoll"].iloc[0]
+                        df.loc[index, "Abgelegt & Übergeben"] = planio_row["closed_on"].iloc[0]
                         df.loc[index, "Sachstand"] = planio_row["sachstand"].iloc[0]
                         if not pd.isnull(row["Erschließung-Bemerkung"]) and not pd.isnull(planio_row["bemerkung"].iloc[0]):
                             patterns = [r"\nOrtstermin: \d{4}-\d{2}-\d{2}",r"\n\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}",r"Ortstermin: \d{4}-\d{2}-\d{2}",r"\d{1}. Kontaktversuch: \d{4}-\d{2}-\d{2}"]
@@ -71,8 +72,6 @@ def main():
 
                             # Clean up leading/trailing spaces after replacement
                             row["Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"].strip()
-
-                            # Print the updated row
                             print(row["Erschließung-Bemerkung"])
                             df.loc[index, "Erschließung-Bemerkung"] = row["Erschließung-Bemerkung"] + "\n" + planio_row["bemerkung"].iloc[0]
                         elif not pd.isnull(planio_row["bemerkung"].iloc[0]):
@@ -171,7 +170,7 @@ def main():
             sheet.column_dimensions['K'].width = 20
             sheet.column_dimensions['O'].width = 25
             # Specify the column you want to modify (e.g., column 'A')
-            column_letter = 'R'
+            column_letter = 'S'
 
             # Loop through all rows in the specified column and set text alignment to left
             for row in sheet.iter_rows(min_col=sheet[column_letter][0].column, max_col=sheet[column_letter][0].column, min_row=1, max_row=sheet.max_row):
