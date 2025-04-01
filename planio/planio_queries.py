@@ -53,37 +53,39 @@ def get_begehungsdaten(api_key: str, tracker_ids:str):
             break
         
         for issue in data['issues']:
-            sachstand = ""
-            bemerkung = ""
-            protokoll = ""
-            closed_on = ""
-            #print(issue['id'],"\n","\n",issue["status"]['name'],"\n",issue["parent"]['id'],"\n",issue["subject"],"\n",issue["description"])
-            #print(issue['id'],"\n",issue["project"]['name'],"\n",issue["tracker"]['name'],"\n",issue["status"]['name'],"\n",issue["parent"]['id'],"\n",issue["subject"],"\n",issue["description"])
-            for custom_field in issue["custom_fields"]:
-                if custom_field["name"] == "Sachstand" and custom_field["value"] != "":
-                    sachstand = sachstand + (custom_field["value"]) + "\n"
-                if custom_field["name"] == "Ortstermin" and custom_field["value"] != "":
-                    bemerkung = custom_field["name"] + ": " + format_date_from_string(custom_field["value"]) + "\n"
-                if custom_field["name"].endswith("Kontaktversuch") and custom_field["value"] != "":
-                    bemerkung = bemerkung + custom_field["name"] + ": " + format_date_from_string(custom_field["value"]) + "\n"
-                if custom_field["name"] == "Protokoll versendet" and custom_field["value"]:
-                    protokoll = format_date_from_string(custom_field["value"])
-            if issue["closed_on"]:
-                closed_on = format_date_from_string(issue["closed_on"])
-            issue_data = {
-                'issue_id': issue['id'],
-                'Gfrgebaeudeid': int(issue["subject"].split()[0]),
-                'status': issue["status"]['name'],
-                'sachstand': sachstand,
-                'bemerkung': bemerkung,
-                'description': issue["description"],
-                'protokoll': protokoll,
-                'closed_on': closed_on,
-            }
-            # for custom_field in issue.get('custom_fields'):
-            #     if custom_field['name'] == nachbesserungsgrund_fieldname:
-            #         issue_data.update({'nachbesserungsgrund': '; '.join(custom_field['value'])})
-            begehungsdaten.append(issue_data)
+            building_id = issue["subject"].split()[0]
+            if building_id.isnumeric():
+                sachstand = ""
+                bemerkung = ""
+                protokoll = ""
+                closed_on = ""
+                #print(issue['id'],"\n","\n",issue["status"]['name'],"\n",issue["parent"]['id'],"\n",issue["subject"],"\n",issue["description"])
+                #print(issue['id'],"\n",issue["project"]['name'],"\n",issue["tracker"]['name'],"\n",issue["status"]['name'],"\n",issue["parent"]['id'],"\n",issue["subject"],"\n",issue["description"])
+                for custom_field in issue["custom_fields"]:
+                    if custom_field["name"] == "Sachstand" and custom_field["value"] != "":
+                        sachstand = sachstand + (custom_field["value"]) + "\n"
+                    if custom_field["name"] == "Ortstermin" and custom_field["value"] != "":
+                        bemerkung = custom_field["name"] + ": " + format_date_from_string(custom_field["value"]) + "\n"
+                    if custom_field["name"].endswith("Kontaktversuch") and custom_field["value"] != "":
+                        bemerkung = bemerkung + custom_field["name"] + ": " + format_date_from_string(custom_field["value"]) + "\n"
+                    if custom_field["name"] == "Protokoll versendet" and custom_field["value"]:
+                        protokoll = format_date_from_string(custom_field["value"])
+                if issue["closed_on"]:
+                    closed_on = format_date_from_string(issue["closed_on"])
+                issue_data = {
+                    'issue_id': issue['id'],
+                    'Gfrgebaeudeid': int(building_id),
+                    'status': issue["status"]['name'],
+                    'sachstand': sachstand,
+                    'bemerkung': bemerkung,
+                    'description': issue["description"],
+                    'protokoll': protokoll,
+                    'closed_on': closed_on,
+                }
+                # for custom_field in issue.get('custom_fields'):
+                #     if custom_field['name'] == nachbesserungsgrund_fieldname:
+                #         issue_data.update({'nachbesserungsgrund': '; '.join(custom_field['value'])})
+                begehungsdaten.append(issue_data)
 
         offset += 100
         if offset > data["total_count"]:
